@@ -1,4 +1,5 @@
 import { Component } from 'react';
+
 class Weather extends Component {
   state = {
       zipcode: '',
@@ -6,9 +7,10 @@ class Weather extends Component {
       city: '',
       weatherDescription: '',
       maxTemp: '',
-      minTemp: ''
-
+      minTemp: '',
+      icon: ''
   }
+
   handleChange = (event) => {
     this.setState({ zipcode: event.target.value }, () => {
       console.log('Your zip code is', this.state.zipcode);
@@ -17,17 +19,15 @@ class Weather extends Component {
 
   handleSubmit = async (event) => {
       event.preventDefault()
-      const response = await fetch(`http://api.openweathermap.org/data/2.5/weather?zip=${this.state.zipcode},us&appid=052f26926ae9784c2d677ca7bc5dec98`)
+      const response = await fetch(`http://api.openweathermap.org/data/2.5/weather?zip=${this.state.zipcode},us&appid=052f26926ae9784c2d677ca7bc5dec98&units=imperial`)
       const json = await response.json()
-      const convertedTemp = Number.parseInt((json.main.temp - 273.15) * 1.8 + 32)
-      const convertedMinTemp = Number.parseInt((json.main.temp_min - 273.15) * 1.8 + 32)
-      const convertedMaxTemp = Number.parseInt((json.main.temp_max - 273.15) * 1.8 + 32)
       this.setState({
           city: json.name,
-          weatherDescription: json.weather[0].main,
-          temp: convertedTemp,
-          minTemp: convertedMinTemp,
-          maxTemp: convertedMaxTemp
+          weatherDescription: json.weather[0].description,
+          temp: json.main.temp,
+          minTemp: json.main.temp_min,
+          maxTemp: json.main.temp_max,
+          icon: json.weather[0].icon
       })
       console.log(json)
       console.log(json.main.temp_max)
@@ -35,6 +35,18 @@ class Weather extends Component {
     // Your state updates go under function(json)
   }
   render() {
+    let iconUrl =`http://openweathermap.org/img/wn/${this.state.icon}.png`
+    const fullDate = new Date()
+    const weekday = new Array(7);
+        weekday[0] = "Sunday";
+        weekday[1] = "Monday";
+        weekday[2] = "Tuesday";
+        weekday[3] = "Wednesday";
+        weekday[4] = "Thursday";
+        weekday[5] = "Friday";
+        weekday[6] = "Saturday";
+    const today = weekday[fullDate.getDay()]
+
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
@@ -49,7 +61,11 @@ class Weather extends Component {
         <div class="weather-container">
           <h3>{ this.state.city }</h3>
           <p>{ this.state.weatherDescription }</p>
+          <img src={iconUrl} alt='icon'/>
           <h1>{ this.state.temp }</h1>
+          <div>
+              <p>{ today }</p>
+        </div>
           <div class="min-max-temp">
             <p>{ this.state.maxTemp } { this.state.minTemp }</p>
           </div>
